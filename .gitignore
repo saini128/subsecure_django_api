@@ -9,8 +9,7 @@ __pycache__/
 *.pyc
 __pycache__/
 
-# Database files
-*.sqlite3
 
 # Ignore .env files with sensitive info
 .env
+.git/
