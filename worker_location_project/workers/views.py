@@ -4,6 +4,17 @@ from rest_framework.response import Response
 from .models import Worker, Location
 from .serializers import WorkerSerializer, LocationSerializer
 
+@api_view(['GET'])
+def get_all_locations(request):
+    locations = Location.objects.all()
+    serializer = LocationSerializer(locations, many=True)
+    return Response(serializer.data)
+@api_view(['GET'])
+def get_all_workers(request):
+    workers = Worker.objects.all()
+    serializer = WorkerSerializer(workers, many=True)
+    return Response(serializer.data)
+
 @api_view(['POST'])
 def add_location(request):
     serializer = LocationSerializer(data=request.data)
