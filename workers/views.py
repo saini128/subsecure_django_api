@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Worker, Location
 from .serializers import WorkerSerializer, LocationSerializer
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 @api_view(['GET'])
 def get_all_locations(request):
@@ -27,24 +29,29 @@ def add_location(request):
 def add_worker(request):
     data = request.data
 
+    print("Received data:", data)
     # Check if the worker with the given ID already exists
-    if Worker.objects.filter(id=data['id']).exists():
+    if Worker.objects.filter(id=data.get('id')).exists():
         return Response({'error': 'Worker with this ID already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Try to get the location
-    try:
-        location = Location.objects.get(id=data['location'])
-    except Location.DoesNotExist:
-        return Response({'error': 'Location not found'}, status=status.HTTP_404_NOT_FOUND)
+    # If location is provided, handle it; if not, skip
+    if 'location' in data and data['location']:
+        try:
+            location = Location.objects.get(id=data['location'])
+        except Location.DoesNotExist:
+            return Response({'error': 'Location not found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        location = None  # Set location to None if not provided
 
-    # Now that we know the worker doesn't exist and the location is valid, try to add the worker
+    # Create the worker
     serializer = WorkerSerializer(data=data)
     if serializer.is_valid():
-        serializer.save()
+        worker = serializer.save()
 
-        # Increment the location's worker count after successfully adding the worker
-        location.number_of_workers += 1
-        location.save()
+        # If a location was provided, update the worker count
+        if location:
+            location.number_of_workers += 1
+            location.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

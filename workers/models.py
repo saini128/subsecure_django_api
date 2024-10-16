@@ -1,11 +1,18 @@
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Message(models.Model):
+    message = models.JSONField()
+    user = models.ForeignKey(to=User, on_delete=models.CASCADE, null=True, blank=True)
 
 class Location(models.Model):
     id = models.CharField(max_length=4, unique=True, primary_key=True)
     description = models.CharField(max_length=255)
     number_of_workers = models.IntegerField(default=0)
-    temperature = models.FloatField()
-    o2_level = models.FloatField()
+    temperature = models.FloatField(null=True, blank=True)
+    o2_level = models.FloatField(null=True, blank=True)
     emergency_bit = models.BooleanField(default=False)
 
     def delete(self, *args, **kwargs):
