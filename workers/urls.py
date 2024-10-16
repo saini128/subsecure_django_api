@@ -9,4 +9,6 @@ urlpatterns = [
     path('update-worker/<str:worker_id>/', views.update_worker, name='update_worker'),
     path('delete-worker/<str:worker_id>/', views.delete_worker, name='delete_worker'),
     path('delete-location/<str:location_id>/', views.delete_location, name='delete_location'),
+    path('api/workers/', views.worker_list, name='worker_list'),
+    path('api/locations/', views.location_list, name='location_list'),
 ]

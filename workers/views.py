@@ -124,3 +124,35 @@ def delete_location(request, location_id):
         return Response({'message': 'Location deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     except Location.DoesNotExist:
         return Response({'error': 'Location not found'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET', 'POST'])
+def worker_list(request):
+    if request.method == 'GET':
+        # Retrieve all workers
+        workers = Worker.objects.all()
+        serializer = WorkerSerializer(workers, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        # Add a new worker
+        serializer = WorkerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'POST'])
+def location_list(request):
+    if request.method == 'GET':
+        # Retrieve all locations
+        locations = Location.objects.all()
+        serializer = LocationSerializer(locations, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        # Add a new location
+        serializer = LocationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

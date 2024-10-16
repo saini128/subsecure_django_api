@@ -13,3 +13,4 @@ __pycache__/
 # Ignore .env files with sensitive info
 .env
 .git/
+.venv

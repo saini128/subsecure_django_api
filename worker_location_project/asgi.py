@@ -7,25 +7,27 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 """
 
-# worker_location_project/asgi.py
-
 import os
+# from dotenv import load_dotenv
+
+# Load environment variables from .env file
+# load_dotenv()
+
+# Set the Django settings module environment variable
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'worker_location_project.settings')
+
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from django.urls import path
-from workers.consumers import WorkerConsumer  # Import your WebSocket consumer
+from . import routing
+from workers.routing import websocket_urlpatterns
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'worker_location_project.settings')
-
+# Define the application using ProtocolTypeRouter
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),  # Handle traditional HTTP requests
-    "websocket": AuthMiddlewareStack(  # Handle WebSocket connections
-        URLRouter([
-            path("ws/workers/", WorkerConsumer.as_asgi()),  # Define WebSocket endpoint for workers
-            path("ws/locations/", WorkerConsumer.as_asgi()),  # Optional: WebSocket endpoint for locations
-        ])
+    "http": get_asgi_application(),  # HTTP protocol
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            websocket_urlpatterns
+        )
     ),
 })
-
-#application = get_asgi_application()
