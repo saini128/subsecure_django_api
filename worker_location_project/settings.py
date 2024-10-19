@@ -87,18 +87,20 @@ import os
 
 # Get the environment variable for production
 USE_REDIS = os.getenv('USE_REDIS', 'False').lower() == 'true'
-print("Use Redis: ",USE_REDIS)
 if USE_REDIS:
     # Configure Redis channel layer for production
+    print("Using Redis as Channel Layer")
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                "hosts": [("127.0.0.1", 6379)],
+                "hosts": [("redis", 6379)],
             },
         },
     }
 else:
+    print("Using InMemory Channel Layer")
     # Use in-memory channel layer for development
     CHANNEL_LAYERS = {
         'default': {
