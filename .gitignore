@@ -14,3 +14,7 @@ __pycache__/
 .env
 .git/
 .venv
+
+# static files from python manage.py collectstatic
+staticfiles/
+static/
