@@ -30,7 +30,7 @@ class WorkerConsumer(AsyncWebsocketConsumer):
     def get_workers(self):
         from .models import Worker
         
-        return list(Worker.objects.select_related('location').values('name', 'age', 'location__description'))
+        return list(Worker.objects.select_related('location').values('id','name', 'age', 'location_id'))
 class LocationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
@@ -58,4 +58,4 @@ class LocationConsumer(AsyncWebsocketConsumer):
     def get_locations(self):
         from workers.models import Location
         
-        return list(Location.objects.values('ldescription', 'temperature', 'O2_level'))
+        return list(Location.objects.values('id','description', 'temperature', 'o2_level','number_of_workers','emergency_bit'))
