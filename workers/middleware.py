@@ -1,5 +1,5 @@
 import jwt
-from channels.middleware.base import BaseMiddleware
+from channels.middleware import BaseMiddleware
 from channels.exceptions import DenyConnection
 from django.conf import settings
 from channels.auth import get_user

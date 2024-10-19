@@ -31,7 +31,7 @@ class Worker(models.Model):
     id = models.CharField(max_length=10, primary_key=True)  # Change this to CharField for custom IDs
     name = models.CharField(max_length=100)  # Name of the worker
     age = models.IntegerField()  # Age of the worker
-    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)  # Reference to the Location model
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='workers')  # Reference to the Location model
 
     def delete(self, *args, **kwargs):
         # When a worker is deleted, decrease the worker count of their location

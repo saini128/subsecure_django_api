@@ -20,7 +20,8 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from . import routing
-from workers.routing import websocket_urlpatterns
+from workers.routing import websocket_urlpatterns  # or worker_location_project.routing
+from workers.middleware import WebSocketJWTAuthMiddleware
 
 # Define the application using ProtocolTypeRouter
 application = ProtocolTypeRouter({

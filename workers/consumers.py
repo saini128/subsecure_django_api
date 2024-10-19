@@ -24,21 +24,23 @@ class WorkerConsumer(AsyncWebsocketConsumer):
         print("Receiving data:", text_data)
         data = json.loads(text_data)
     # Check if the action is to get workers
-        if data.get('action') == 'get_workers':
-            print("Fetching workers...")
+        # if data.get('action') == 'get_workers':
+        #     print("Fetching workers...")
         # Fetch workers from the database asynchronously
-            workers = await self.get_workers()
-            print("Workers fetched:", workers)
-            await self.send(text_data=json.dumps({
+        workers = await self.get_workers()
+        print("Workers fetched:", workers)
+        await self.send(text_data=json.dumps({
                 'workers': workers
         }))
-
     @database_sync_to_async
     def get_workers(self):
         from .models import Worker
         # This runs in a synchronous context
-        return list(Worker.objects.values('name', 'age', 'location_description'))
+        return list(Worker.objects.select_related('location').values('name', 'age', 'location__description'))
+        #return list(Worker.objects.values('name', 'age'))
+  
 
+    
 class LocationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
