@@ -15,6 +15,3 @@ __pycache__/
 .git/
 .venv
 
-# static files from python manage.py collectstatic
-staticfiles/
-static/
