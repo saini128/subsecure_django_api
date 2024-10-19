@@ -50,18 +50,27 @@ class LocationConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         # Import Location model here
-        from .models import Location
+        from workers.models import Location
+        print("Receiving data:", text_data)
+        data = json.loads(text_data)
         # locations = Location.objects.all().values('location_description', 'temperature', 'O2_level')
         # await self.send(text_data=json.dumps({
         #     'locations': list(locations)
         # }))
-        locations = await database_sync_to_async(self.get_locations)()
+        # locations = await database_sync_to_async(self.get_locations)()
+        # await self.send(text_data=json.dumps({
+        #     'locations': locations
+        # }))
+        locations = await self.get_locations()
+        print("Locations fetched:", locations)
+
+            # Send the locations back to the WebSocket
         await self.send(text_data=json.dumps({
-            'locations': locations
-        }))
+                'locations': locations
+            }))
 
     @database_sync_to_async
     def get_locations(self):
-        from .models import Location
+        from workers.models import Location
         # This runs in a synchronous context
-        return list(Location.objects.values('location_description', 'temperature', 'O2_level'))
+        return list(Location.objects.values('description', 'temperature', 'o2_level'))
