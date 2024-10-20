@@ -80,6 +80,10 @@ def update_worker(request, worker_id):
     # Update worker's details
     worker_serializer = WorkerSerializer(worker, data=data, partial=True)  # Use partial=True to allow partial updates
     if worker_serializer.is_valid():
+        # Check if the location did not existed before
+        if not worker.location:
+            new_location.number_of_workers += 1
+            new_location.save()
         # Check if the location is being changed
         if worker.location.id != new_location.id:
             old_location = worker.location
