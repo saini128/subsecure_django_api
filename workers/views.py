@@ -58,6 +58,71 @@ def add_worker(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
+def update_workers(request):
+    data = request.data
+
+    # Ensure data is a list
+    if not isinstance(data, list):
+        return Response({'error': 'Data should be a list of workers'}, status=status.HTTP_400_BAD_REQUEST)
+
+    updated_workers = []
+    errors = []
+
+    for worker_data in data:
+        worker_id = worker_data.get('worker_id')
+        location_id = worker_data.get('location_id')
+
+        if not worker_id or not location_id:
+            errors.append({
+                'error': 'Worker ID and Location ID are required for update',
+                'data': worker_data
+            })
+            continue
+
+        try:
+            # Get the worker by ID
+            worker = Worker.objects.get(id=worker_id)
+        except Worker.DoesNotExist:
+            errors.append({'error': 'Worker not found', 'worker_id': worker_id})
+            continue
+
+        # Ensure the new location exists
+        try:
+            new_location = Location.objects.get(id=location_id)
+        except Location.DoesNotExist:
+            errors.append({'error': 'New location not found', 'worker_id': worker_id, 'location_id': location_id})
+            continue
+        
+        if not worker.location:
+            print("Worker did not have a location before")
+            new_location.number_of_workers += 1
+            new_location.save()
+        # Handle location changes
+        elif worker.location != new_location:
+            old_location = worker.location
+            if old_location:
+                old_location.number_of_workers -= 1
+                old_location.save()
+
+            new_location.number_of_workers += 1
+            new_location.save()
+
+        # Update the worker's location
+        worker.location = new_location
+        worker.save()
+        updated_workers.append({
+            'worker_id': worker_id,
+            'new_location_id': location_id
+        })
+
+    if errors:
+        return Response({'updated_workers': updated_workers, 'errors': errors}, status=status.HTTP_207_MULTI_STATUS)
+
+    return Response({'updated_workers': updated_workers}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['PUT'])
 def update_worker(request, worker_id):
     try:
         # Try to get the worker by id, if not found, return an error
