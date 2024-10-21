@@ -3,7 +3,7 @@
 ### Resource Endpoints
 
 
-#### Retrieve, Update, and Delete a Specific Worker
+#### Update Workers API
 - **URL:** `/api/update-workers/`
 - **Methods:**
   - `PUT`: Update a set of workers by ID.
