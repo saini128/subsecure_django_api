@@ -17,6 +17,17 @@ def get_all_workers(request):
     serializer = WorkerSerializer(workers, many=True)
     return Response(serializer.data)
 
+@api_view(['GET'])
+def end_shift(request):
+    
+    workers = Worker.objects.all()
+    locations=Location.objects.all()
+    
+    workers.update(location=None)
+    locations.update(number_of_workers=0)
+
+    return Response({'message': 'Shift ended successfully'}, status=status.HTTP_200_OK)
+
 @api_view(['POST'])
 def add_location(request):
     serializer = LocationSerializer(data=request.data)
@@ -30,25 +41,25 @@ def add_worker(request):
     data = request.data
 
     print("Received data:", data)
-    # Check if the worker with the given ID already exists
+    
     if Worker.objects.filter(id=data.get('id')).exists():
         return Response({'error': 'Worker with this ID already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # If location is provided, handle it; if not, skip
+    
     if 'location' in data and data['location']:
         try:
             location = Location.objects.get(id=data['location'])
         except Location.DoesNotExist:
             return Response({'error': 'Location not found'}, status=status.HTTP_404_NOT_FOUND)
     else:
-        location = None  # Set location to None if not provided
+        location = None  
 
-    # Create the worker
+    
     serializer = WorkerSerializer(data=data)
     if serializer.is_valid():
         worker = serializer.save()
 
-        # If a location was provided, update the worker count
+        
         if location:
             location.number_of_workers += 1
             location.save()
@@ -61,7 +72,7 @@ def add_worker(request):
 def update_workers(request):
     data = request.data
 
-    # Ensure data is a list
+    
     if not isinstance(data, list):
         return Response({'error': 'Data should be a list of workers'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -80,34 +91,21 @@ def update_workers(request):
             continue
 
         try:
-            # Get the worker by ID
+            
             worker = Worker.objects.get(id=worker_id)
         except Worker.DoesNotExist:
             errors.append({'error': 'Worker not found', 'worker_id': worker_id})
             continue
 
-        # Ensure the new location exists
+        
         try:
             new_location = Location.objects.get(id=location_id)
         except Location.DoesNotExist:
             errors.append({'error': 'New location not found', 'worker_id': worker_id, 'location_id': location_id})
             continue
         
-        if not worker.location:
-            print("Worker did not have a location before")
-            new_location.number_of_workers += 1
-            new_location.save()
-        # Handle location changes
-        elif worker.location != new_location:
-            old_location = worker.location
-            if old_location:
-                old_location.number_of_workers -= 1
-                old_location.save()
 
-            new_location.number_of_workers += 1
-            new_location.save()
-
-        # Update the worker's location
+        
         worker.location = new_location
         worker.save()
         updated_workers.append({
@@ -125,43 +123,27 @@ def update_workers(request):
 @api_view(['PUT'])
 def update_worker(request, worker_id):
     try:
-        # Try to get the worker by id, if not found, return an error
+        
         worker = Worker.objects.get(id=worker_id)
     except Worker.DoesNotExist:
         return Response({'error': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
 
     data = request.data
 
-    # Ensure the new location exists
+    
     try:
         new_location = Location.objects.get(id=data['location'])
     except Location.DoesNotExist:
         return Response({'error': 'New location not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Exclude the worker's ID from the update data to avoid creating new workers
+    
     if 'id' in data:
-        del data['id']  # Prevent 'id' from being modified
+        del data['id']  
 
-    # Update worker's details
-    worker_serializer = WorkerSerializer(worker, data=data, partial=True)  # Use partial=True to allow partial updates
+    
+    worker_serializer = WorkerSerializer(worker, data=data, partial=True)  
     if worker_serializer.is_valid():
-        # Check if the location did not existed before
-        print("Worker location:", worker.location)
-        if not worker.location:
-            print("Worker did not have a location before")
-            new_location.number_of_workers += 1
-            new_location.save()
-        # Check if the location is being changed
-        elif worker.location.id != new_location.id:
-            old_location = worker.location
-            if old_location:
-                old_location.number_of_workers -= 1
-                old_location.save()
-
-            new_location.number_of_workers += 1
-            new_location.save()
-
-        worker_serializer.save()  # Save the updated worker
+        worker_serializer.save()  
         return Response(worker_serializer.data)
 
     return Response(worker_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -170,13 +152,9 @@ def update_worker(request, worker_id):
 def delete_worker(request, worker_id):
     try:
         worker = Worker.objects.get(id=worker_id)
-        # location = worker.location
+        
 
-        worker.delete()  # Delete the worker
-        # Decrease worker count at the old location
-        # if location:
-        #     location.number_of_workers -= 1
-        #     location.save()
+        worker.delete()  
 
         return Response({'message': 'Worker deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
     except Worker.DoesNotExist:
@@ -188,7 +166,7 @@ def delete_location(request, location_id):
         location = Location.objects.get(id=location_id)
         workers = Worker.objects.filter(location=location)
 
-        # Set the location of associated workers to None
+        
         workers.update(location=None)
 
         location.delete()
@@ -199,13 +177,13 @@ def delete_location(request, location_id):
 @api_view(['GET', 'POST'])
 def worker_list(request):
     if request.method == 'GET':
-        # Retrieve all workers
+        
         workers = Worker.objects.all()
         serializer = WorkerSerializer(workers, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        # Add a new worker
+        
         serializer = WorkerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -215,13 +193,13 @@ def worker_list(request):
 @api_view(['GET', 'POST'])
 def location_list(request):
     if request.method == 'GET':
-        # Retrieve all locations
+        
         locations = Location.objects.all()
         serializer = LocationSerializer(locations, many=True)
         return Response(serializer.data)
 
     elif request.method == 'POST':
-        # Add a new location
+        
         serializer = LocationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

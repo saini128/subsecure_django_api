@@ -12,4 +12,5 @@ urlpatterns = [
     path('delete-location/<str:location_id>/', views.delete_location, name='delete_location'), #DELETE
     path('api/workers/', views.worker_list, name='worker_list'), #GET, POST
     path('api/locations/', views.location_list, name='location_list'), #GET, POST
+    path('end-shift/', views.end_shift, name='end_shift'), #GET
 ]
