@@ -24,6 +24,7 @@ class Location(models.Model):
     pm1_level = models.FloatField(null=True, blank=True)
     o2_level = models.FloatField(null=True, blank=True)
     emergency_bit = models.BooleanField(default=False)
+    available = models.BooleanField(default=True)
 
     def delete(self, *args, **kwargs):
         
