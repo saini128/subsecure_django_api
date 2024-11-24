@@ -6,7 +6,7 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = '__all__'
         extra_kwargs = {
-            'o2_level': {'required': False},
+            'humidity': {'required': False},
             'temperature': {'required': False}
         }
 
