@@ -6,10 +6,10 @@
 
 ## API Endpoints
 
-#### Update Workers API
+#### Update Data API
 - **URL:** `/api/update-data/`
 - **Methods:**
-  - `PUT`: Update a set of workers by ID.
+  - `PUT`: Update a set of workers and nodes by ID.
 - **Body:**
   - ```json
         [
@@ -27,7 +27,7 @@
             }
         ]
     ```
-- **Description:** This endpoint allows you to update workers by its ID.
+- **Description:** This endpoint allows you to update data by its IDs.
 
 ## Websocket Endpoints
 
