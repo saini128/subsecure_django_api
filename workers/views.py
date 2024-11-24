@@ -69,54 +69,88 @@ def add_worker(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
-def update_workers(request):
-    data = request.data
-
-    
+def update_data(request):
+    data = request.data  
     if not isinstance(data, list):
         return Response({'error': 'Data should be a list of workers'}, status=status.HTTP_400_BAD_REQUEST)
-
     updated_workers = []
+    updated_locations = []
     errors = []
-
-    for worker_data in data:
-        worker_id = worker_data.get('worker_id')
-        location_id = worker_data.get('location_id')
-
-        if not worker_id or not location_id:
-            errors.append({
-                'error': 'Worker ID and Location ID are required for update',
-                'data': worker_data
+    for update_data in data:
+        if update_data.get('update_type') == 'worker':
+            worker_data = update_data
+            worker_id = worker_data.get('worker_id')
+            location_id = worker_data.get('location_id')
+            sos_bit = worker_data.get('sos_bit')
+            if not worker_id or not location_id:
+                errors.append({
+                    'error': 'Worker ID and Location ID are required for update',
+                    'data': worker_data
+                })
+                continue
+            try:
+                worker = Worker.objects.get(id=worker_id)
+            except Worker.DoesNotExist:
+                errors.append({'error': 'Worker not found', 'worker_id': worker_id})
+                continue        
+            try:
+                new_location = Location.objects.get(id=location_id)
+            except Location.DoesNotExist:
+                errors.append({'error': 'New location not found', 'worker_id': worker_id, 'location_id': location_id})
+                continue
+                
+            worker.location = new_location
+            worker.sos = sos_bit
+            worker.save()
+            updated_workers.append({
+                'worker_id': worker_id,
+                'new_location_id': location_id
             })
-            continue
-
-        try:
+        else:
+            location_id = update_data.get('location_id')
+            if not location_id:
+                errors.append({
+                    'error': 'Location ID is required for location update',
+                    'data': update_data
+                })
+                continue
+                
+            try:
+                location = Location.objects.get(id=location_id)
+            except Location.DoesNotExist:
+                errors.append({'error': 'Location not found', 'location_id': location_id})
+                continue
             
-            worker = Worker.objects.get(id=worker_id)
-        except Worker.DoesNotExist:
-            errors.append({'error': 'Worker not found', 'worker_id': worker_id})
-            continue
-
-        
-        try:
-            new_location = Location.objects.get(id=location_id)
-        except Location.DoesNotExist:
-            errors.append({'error': 'New location not found', 'worker_id': worker_id, 'location_id': location_id})
-            continue
-        
-
-        
-        worker.location = new_location
-        worker.save()
-        updated_workers.append({
-            'worker_id': worker_id,
-            'new_location_id': location_id
-        })
+            # List of updatable location fields
+            location_fields = [
+                'description', 'temperature', 'humidity', 'pm10_level',
+                'pm25_level', 'pm1_level', 'o2_level', 'emergency_bit'
+            ]
+            
+            # Update location fields if provided
+            updated_fields = {}
+            for field in location_fields:
+                if field in update_data:
+                    setattr(location, field, update_data[field])
+                    updated_fields[field] = update_data[field]
+            
+            location.save()
+            
+            updated_locations.append({
+                'location_id': location_id,
+                'updated_fields': updated_fields
+            })
+            
+    response_data = {
+        'updated_workers': updated_workers,
+        'updated_locations': updated_locations
+    }
 
     if errors:
-        return Response({'updated_workers': updated_workers, 'errors': errors}, status=status.HTTP_207_MULTI_STATUS)
+        response_data['errors'] = errors
+        return Response(response_data, status=status.HTTP_207_MULTI_STATUS)
 
-    return Response({'updated_workers': updated_workers}, status=status.HTTP_200_OK)
+    return Response(response_data, status=status.HTTP_200_OK)
 
 
 

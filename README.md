@@ -7,23 +7,23 @@
 ## API Endpoints
 
 #### Update Workers API
-- **URL:** `/api/update-workers/`
+- **URL:** `/api/update-data/`
 - **Methods:**
   - `PUT`: Update a set of workers by ID.
 - **Body:**
   - ```json
         [
             {
+                "update_type": "worker",
                 "worker_id": "W001",
-                "location_id": "L002"
+                "location_id": "L002",
+                "sos_bit":true
             },
             {
-                "worker_id": "W002",
-                "location_id": "L003"
-            },
-            {
-                "worker_id": "W003",
-                "location_id": "L001"
+                "update_type": "location",
+                "location_id": "L001",
+                "temperature": 25.5,
+                "humidity": 65.0,
             }
         ]
     ```
