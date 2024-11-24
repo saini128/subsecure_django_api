@@ -57,7 +57,8 @@ class Worker(models.Model):
     name = models.CharField(max_length=100)  
     age = models.IntegerField()  
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='workers')  
-    sos = models.BooleanField(default=False)  
+    sos = models.BooleanField(default=False)
+    available = models.BooleanField(default=True)  
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
