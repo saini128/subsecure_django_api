@@ -15,6 +15,6 @@ urlpatterns = [
     path('end-shift/', views.end_shift, name='end_shift'), #GET
     path('update-attendence/', views.update_attendence, name='update_attendence'), #GET
     # path('get-metrices/', views.get_safe_levels, name='get_safe_levels'), #TO BE IMPLEMENTED
-    # path('get-alerts/', views.get_alerts, name='get_worker'), #GET
+    path('get-alerts/', views.get_alerts, name='get_worker'), #GET
     
 ]

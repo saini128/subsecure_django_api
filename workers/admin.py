@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Location, Worker, SafeLevels
+from .models import Location, Worker, SafeLevels, EventLog
 
 
 admin.site.site_header = "SubSecure Administration"
@@ -8,3 +8,4 @@ admin.site.index_title = "Welcome to SubSecure Admin"
 admin.site.register(Location)
 admin.site.register(Worker)
 admin.site.register(SafeLevels)
+admin.site.register(EventLog)

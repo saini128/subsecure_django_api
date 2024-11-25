@@ -1,6 +1,7 @@
 from concurrent.futures.thread import _worker
+from datetime import datetime
 from django.db import models
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, post_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
@@ -136,3 +137,45 @@ def update_all_location_counts():
             location.save(update_fields=['number_of_workers'])
 
 # Add save method to Worker model to track location changes
+class EventLog(models.Model):
+    EVENT_TYPE_CHOICES = [
+        ('EMERGENCY', 'Emergency Triggered'),
+        ('SOS', 'SOS Triggered'),
+    ]
+    event_type = models.CharField(max_length=20, choices=EVENT_TYPE_CHOICES)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True)
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE, null=True, blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    details = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        if self.event_type == 'EMERGENCY':
+            return f"Emergency at Location: {self.location}"
+        elif self.event_type == 'SOS':
+            return f"SOS Triggered by Worker: {self.worker}"
+
+# Signal to log emergency bit triggers
+@receiver(pre_save, sender=Location)
+def log_emergency_trigger(sender, instance, **kwargs):
+    if instance.pk:
+        previous = Location.objects.get(pk=instance.pk)
+        if not previous.emergency_bit and instance.emergency_bit:
+            EventLog.objects.create(
+                event_type='EMERGENCY',
+                timestamp=datetime.now(),
+                location=instance,
+                details=f"Location {instance.description} triggered emergency due to unsafe conditions."
+            )
+
+# Signal to log SOS button triggers
+@receiver(pre_save, sender=Worker)
+def log_sos_trigger(sender, instance, **kwargs):
+    if instance.pk:
+        previous = Worker.objects.get(pk=instance.pk)
+        if not previous.sos and instance.sos:
+            EventLog.objects.create(
+                event_type='SOS',
+                worker=instance,
+                timestamp=datetime.now(),
+                details=f"Worker {instance.name} triggered SOS at location {instance.location}."
+            )

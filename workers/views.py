@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Worker, Location
-from .serializers import WorkerSerializer, LocationSerializer
+from .models import Worker, Location, EventLog
+from .serializers import WorkerSerializer, LocationSerializer, EventLogSerializer
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
@@ -82,6 +82,11 @@ def update_attendence(request):
     worker.save()
     return Response({'message': 'Attendence updated successfully'}, status=status.HTTP_200_OK)
 
+@api_view(['GET'])
+def get_alerts(request):
+    event_logs = EventLog.objects.all()
+    serializer = EventLogSerializer(event_logs, many=True)
+    return Response({'alerts': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(['PUT'])
 def update_data(request):
