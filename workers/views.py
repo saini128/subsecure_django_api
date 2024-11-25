@@ -79,6 +79,7 @@ def update_attendence(request):
     worker.available = not worker.available
     if not worker.available:
         worker.location = None
+        worker.sos = False
     worker.save()
     return Response({'message': 'Attendence updated successfully'}, status=status.HTTP_200_OK)
 
