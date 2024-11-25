@@ -25,6 +25,9 @@ class Location(models.Model):
     o2_level = models.FloatField(null=True, blank=True)
     emergency_bit = models.BooleanField(default=False)
     available = models.BooleanField(default=True)
+    x = models.FloatField(null=True, blank=True)
+    y = models.FloatField(null=True, blank=True)
+
     
     def save(self, *args, **kwargs):
         # Logic to update emergency_bit based on safe levels
