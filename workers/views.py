@@ -77,6 +77,8 @@ def update_attendence(request):
     except Worker.DoesNotExist:
         return Response({'error': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
     worker.available = not worker.available
+    if not worker.available:
+        worker.location = None
     worker.save()
     return Response({'message': 'Attendence updated successfully'}, status=status.HTTP_200_OK)
 
