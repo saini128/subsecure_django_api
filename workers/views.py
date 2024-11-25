@@ -68,6 +68,19 @@ def add_worker(request):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def update_attendence(request):
+    data = request.data
+    worker_id=request.data['worker_id']
+    try:
+        worker = Worker.objects.get(id=worker_id)
+    except Worker.DoesNotExist:
+        return Response({'error': 'Worker not found'}, status=status.HTTP_404_NOT_FOUND)
+    worker.available = not worker.available
+    worker.save()
+    return Response({'message': 'Attendence updated successfully'}, status=status.HTTP_200_OK)
+
+
 @api_view(['PUT'])
 def update_data(request):
     data = request.data  
@@ -92,7 +105,11 @@ def update_data(request):
                 worker = Worker.objects.get(id=worker_id)
             except Worker.DoesNotExist:
                 errors.append({'error': 'Worker not found', 'worker_id': worker_id})
-                continue        
+                continue
+            if not worker.available:
+                errors.append({'error': 'Worker is not available', 'worker_id': worker_id})
+                continue
+                    
             try:
                 new_location = Location.objects.get(id=location_id)
             except Location.DoesNotExist:
