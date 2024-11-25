@@ -59,8 +59,8 @@ class Worker(models.Model):
     age = models.IntegerField()  
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name='workers')  
     sos = models.BooleanField(default=False)
-    available = models.BooleanField(default=True)  
-
+    available = models.BooleanField(default=True)
+    aadhar = models.CharField(max_length=12, null=True, blank=True)
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._original_location_id = self.location_id if self.location_id else None
