@@ -58,4 +58,4 @@ class LocationConsumer(AsyncWebsocketConsumer):
     def get_locations(self):
         from workers.models import Location
         
-        return list(Location.objects.values('id','description', 'temperature', 'humidity','number_of_workers','emergency_bit','available', 'pm10_level', 'pm25_level', 'pm1_level', '[o2_level]'))
+        return list(Location.objects.values('id','description', 'temperature', 'humidity','number_of_workers','emergency_bit','available', 'pm10_level', 'pm25_level', 'pm1_level', 'o2_level'))
