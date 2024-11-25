@@ -25,6 +25,20 @@ class Location(models.Model):
     o2_level = models.FloatField(null=True, blank=True)
     emergency_bit = models.BooleanField(default=False)
     available = models.BooleanField(default=True)
+    
+    def save(self, *args, **kwargs):
+        # Logic to update emergency_bit based on safe levels
+        safe_levels = SafeLevels.objects.first()
+        if safe_levels:
+            self.emergency_bit = (
+                not (safe_levels.pm10_min <= self.pm10_level <= safe_levels.pm10_max) or
+                not (safe_levels.pm25_min <= self.pm25_level <= safe_levels.pm25_max) or
+                not (safe_levels.pm1_min <= self.pm1_level <= safe_levels.pm1_max) or
+                not (safe_levels.o2_min <= self.o2_level <= safe_levels.o2_max) or
+                not (safe_levels.temperature_min <= self.temperature <= safe_levels.temperature_max) or
+                not (safe_levels.humidity_min <= self.humidity <= safe_levels.humidity_max)
+            )
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         
